@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 224 25% 6%;
+    --foreground: 232 30% 92%;
+    --card: 225 22% 11%;
+    --card-foreground: 232 30% 92%;
+    --popover: 225 22% 11%;
+    --popover-foreground: 232 30% 92%;
+    --primary: 229 70% 67%;
+    --primary-foreground: 224 25% 6%;
+    --secondary: 226 18% 17%;
+    --secondary-foreground: 232 30% 92%;
+    --muted: 226 18% 17%;
+    --muted-foreground: 228 16% 51%;
+    --accent: 226 18% 20%;
+    --accent-foreground: 232 30% 92%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 228 23% 22%;
+    --input: 228 23% 22%;
+    --ring: 229 70% 67%;
+    --radius: 0.75rem;
+
+    --done: 142 56% 52%;
+    --done-bg: 152 40% 9%;
+    --high: 0 80% 69%;
+    --warning: 33 86% 53%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html, body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+/* Board dot-grid background (ported from todo-board.html) */
+.board-dotgrid::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, hsl(228 23% 22%) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.pulse-red { animation: pulse-red 2s ease-in-out infinite; }
