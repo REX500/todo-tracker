@@ -95,6 +95,23 @@ export function BoardView({ initialTodos }: { initialTodos: Todo[] }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/todos");
+        if (!res.ok) return;
+        const data = (await res.json()) as { todos: Todo[] };
+        if (!cancelled) setTodos(data.todos);
+      } catch {
+        /* keep server-rendered todos */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const viewportRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const headersBarRef = useRef<HTMLDivElement>(null);
