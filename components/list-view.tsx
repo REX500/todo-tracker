@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, ExternalLink, Pencil, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,23 @@ export function ListView({ initialTodos }: { initialTodos: Todo[] }) {
   const [editing, setEditing] = useState<{ id: number; values: TodoFormValues } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/todos");
+        if (!res.ok) return;
+        const data = (await res.json()) as { todos: Todo[] };
+        if (!cancelled) setTodos(data.todos);
+      } catch {
+        /* keep server-rendered todos */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const allTags = useMemo(() => {
     const s = new Set<string>();
