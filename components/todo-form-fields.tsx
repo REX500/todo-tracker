@@ -1,8 +1,15 @@
 "use client";
 
+import { useState } from "react";
+import { Calendar as CalendarIcon, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { fmtDeadline, parseDeadline, toDeadlineString } from "@/lib/deadline";
+import { cn } from "@/lib/utils";
 import type { Status } from "@/lib/schema";
 
 export interface TodoFormValues {
@@ -38,6 +45,7 @@ export function TodoFormFields({ idPrefix, value, tagSuggestions, onChange, onSu
     onChange({ ...value, [key]: next });
 
   const datalistId = `${idPrefix}-tag-suggestions`;
+  const [deadlineOpen, setDeadlineOpen] = useState(false);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -100,12 +108,43 @@ export function TodoFormFields({ idPrefix, value, tagSuggestions, onChange, onSu
 
       <div className="space-y-1.5">
         <Label htmlFor={`${idPrefix}-deadline`}>Deadline</Label>
-        <Input
-          id={`${idPrefix}-deadline`}
-          type="date"
-          value={value.deadline}
-          onChange={(e) => set("deadline", e.target.value)}
-        />
+        <div className="flex gap-1">
+          <Popover open={deadlineOpen} onOpenChange={setDeadlineOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                id={`${idPrefix}-deadline`}
+                type="button"
+                variant="outline"
+                className={cn("flex-1 justify-start font-normal", !value.deadline && "text-muted-foreground")}
+              >
+                <CalendarIcon className="h-4 w-4" />
+                {value.deadline ? fmtDeadline(value.deadline) : "Pick a date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={parseDeadline(value.deadline)}
+                defaultMonth={parseDeadline(value.deadline)}
+                onSelect={(date) => {
+                  set("deadline", date ? toDeadlineString(date) : "");
+                  setDeadlineOpen(false);
+                }}
+              />
+            </PopoverContent>
+          </Popover>
+          {value.deadline && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Clear deadline"
+              onClick={() => set("deadline", "")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="sm:col-span-2 space-y-1.5">

@@ -14,6 +14,19 @@ export function deadlineStatus(deadline: string | null, status: Status): Deadlin
   return "ok";
 }
 
+export function parseDeadline(deadline: string): Date | undefined {
+  if (!deadline) return undefined;
+  const date = new Date(`${deadline}T00:00:00`);
+  return isNaN(date.getTime()) ? undefined : date;
+}
+
+export function toDeadlineString(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export function fmtDeadline(deadline: string | null): string {
   if (!deadline) return "";
   return new Date(`${deadline}T00:00:00`).toLocaleDateString(undefined, {
