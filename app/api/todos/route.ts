@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const todos = await listTodos();
-    return NextResponse.json({ todos });
+    return NextResponse.json({ todos }, { headers: { "Cache-Control": "no-store" } });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to load todos";
     return serverError(msg);

@@ -99,7 +99,7 @@ export function BoardView({ initialTodos }: { initialTodos: Todo[] }) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/todos");
+        const res = await fetch("/api/todos", { cache: "no-store" });
         if (!res.ok) return;
         const data = (await res.json()) as { todos: Todo[] };
         if (!cancelled) setTodos(data.todos);
@@ -303,7 +303,7 @@ export function BoardView({ initialTodos }: { initialTodos: Todo[] }) {
 
   async function refresh() {
     try {
-      const res = await fetch("/api/todos");
+      const res = await fetch("/api/todos", { cache: "no-store" });
       if (!res.ok) return;
       const data = (await res.json()) as { todos: Todo[] };
       setTodos(data.todos);

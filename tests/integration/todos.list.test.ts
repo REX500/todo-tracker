@@ -13,6 +13,11 @@ describeWithDb("GET /api/todos", () => {
     expect(body).toEqual({ todos: [] });
   });
 
+  it("sends a no-store cache header so clients never read stale todos", async () => {
+    const res = await GET();
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
+  });
+
   it("returns inserted todos ordered by created_at then id", async () => {
     for (const task of ["alpha", "beta", "gamma"]) {
       const req = new Request("http://test/api/todos", {
