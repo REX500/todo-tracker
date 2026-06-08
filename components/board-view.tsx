@@ -5,6 +5,16 @@ import { useRouter } from "next/navigation";
 import { AlertTriangle, Calendar, Crosshair, Minus, Pencil, Plus, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog";
 import { TodoFormFields, emptyTodoForm, type TodoFormValues } from "@/components/todo-form-fields";
 import { TagBadge } from "@/components/tag-badge";
 import { tagColors } from "@/lib/tag-colors";
@@ -92,6 +102,7 @@ export function BoardView({ initialTodos }: { initialTodos: Todo[] }) {
   const router = useRouter();
   const [todos, setTodos] = useState<Todo[]>(initialTodos);
   const [editing, setEditing] = useState<{ id: number | null; values: TodoFormValues } | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -351,8 +362,10 @@ export function BoardView({ initialTodos }: { initialTodos: Todo[] }) {
     });
   }
 
-  async function handleDelete(id: number) {
-    if (!confirm("Delete this todo?")) return;
+  async function handleDelete() {
+    if (deleteId === null) return;
+    const id = deleteId;
+    setDeleteId(null);
     await withBusy(async () => {
       const res = await fetch(`/api/todos/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(await readError(res));
@@ -490,7 +503,7 @@ export function BoardView({ initialTodos }: { initialTodos: Todo[] }) {
                           <Button size="icon" variant="ghost" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); openEdit(t); }} aria-label="Edit">
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
-                          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); handleDelete(t.id); }} aria-label="Delete">
+                          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); setDeleteId(t.id); }} aria-label="Delete">
                             <span aria-hidden>×</span>
                           </Button>
                         </div>
@@ -543,6 +556,19 @@ export function BoardView({ initialTodos }: { initialTodos: Todo[] }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this todo?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={busy}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
