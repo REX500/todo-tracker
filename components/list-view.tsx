@@ -6,6 +6,16 @@ import { Calendar, ExternalLink, Pencil, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog";
 import { TodoFormFields, emptyTodoForm, type TodoFormValues } from "@/components/todo-form-fields";
 import { TagBadge } from "@/components/tag-badge";
 import { DeadlineChip } from "@/components/deadline-chip";
@@ -54,6 +64,7 @@ export function ListView({ initialTodos }: { initialTodos: Todo[] }) {
   const [search, setSearch] = useState("");
   const [addValues, setAddValues] = useState<TodoFormValues>(emptyTodoForm);
   const [editing, setEditing] = useState<{ id: number; values: TodoFormValues } | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -144,8 +155,10 @@ export function ListView({ initialTodos }: { initialTodos: Todo[] }) {
     });
   }
 
-  async function handleDelete(id: number) {
-    if (!confirm("Delete this todo?")) return;
+  async function handleDelete() {
+    if (deleteId === null) return;
+    const id = deleteId;
+    setDeleteId(null);
     await withBusy(async () => {
       const res = await fetch(`/api/todos/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(await readError(res));
@@ -344,7 +357,7 @@ export function ListView({ initialTodos }: { initialTodos: Todo[] }) {
                   <Button size="icon" variant="ghost" onClick={() => setEditing({ id: t.id, values: toFormValues(t) })} aria-label="Edit">
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button size="icon" variant="ghost" onClick={() => handleDelete(t.id)} aria-label="Delete">
+                  <Button size="icon" variant="ghost" onClick={() => setDeleteId(t.id)} aria-label="Delete">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -374,6 +387,19 @@ export function ListView({ initialTodos }: { initialTodos: Todo[] }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this todo?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={busy}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
